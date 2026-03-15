@@ -1,0 +1,28 @@
+{
+  "goblin": {
+    "name": "小哥布林",
+    "hp": 100,
+    "maxHp": 100,
+    "atk": 15,
+    "def": 5,
+    "speed": 50,
+    "exp": 10,
+    "drop": {
+      "herb": 0.3,
+      "coin": 0.9
+    }
+  },
+  "goblinKing": {
+    "name": "哥布林大王",
+    "hp": 500,
+    "maxHp": 500,
+    "atk": 40,
+    "def": 20,
+    "speed": 40,
+    "exp": 100,
+    "drop": {
+      "sword": 0.2,
+      "coin": 1.0
+    }
+  }
+}

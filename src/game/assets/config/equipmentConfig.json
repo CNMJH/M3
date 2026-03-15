@@ -1,0 +1,31 @@
+{
+  "ironSword": {
+    "name": "铁剑",
+    "slot": "weapon",
+    "stats": { "atk": 20 },
+    "skills": {
+      "q": { "name": "横斩", "damage": 1.5, "cost": 10 },
+      "w": { "name": "冲锋", "damage": 1.2, "cost": 15 }
+    }
+  },
+  "ironHelmet": {
+    "name": "铁盔",
+    "slot": "helmet",
+    "stats": { "def": 10, "maxHp": 50 },
+    "skills": {
+      "e": { "name": "战吼", "buff": "attack_up", "cost": 20 }
+    }
+  },
+  "ironChest": {
+    "name": "铁甲",
+    "slot": "chest",
+    "stats": { "def": 25, "maxHp": 100 },
+    "skills": {}
+  },
+  "ironBoots": {
+    "name": "铁靴",
+    "slot": "boots",
+    "stats": { "def": 8, "speed": 10 },
+    "skills": {}
+  }
+}
