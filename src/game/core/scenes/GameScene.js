@@ -51,7 +51,226 @@ class GameScene extends Phaser.Scene {
     // 连接网络
     this.network.connect();
     
+    // 初始化掉落物系统
+    this.initDropSystem();
+    
+    // 初始化采集系统
+    this.initCollectionSystem();
+    
     console.log('===== GameScene 初始化完成 =====');
+  }
+
+  initDropSystem() {
+    this.droppedItems = [];
+    console.log('✅ 掉落物系统初始化完成');
+  }
+  
+  createDropItem(itemId, x, y) {
+    const graphics = this.make.graphics();
+    
+    // 根据物品 ID 生成不同颜色的掉落物
+    let color = 0xffff00; // 默认金色
+    let size = 12;
+    
+    if (itemId === 'coin') {
+      color = 0xffd700; // 金币 - 金色
+    } else if (itemId === 'herb') {
+      color = 0x00ff00; // 草药 - 绿色
+    } else if (itemId === 'sword') {
+      color = 0x888888; // 剑 - 银色
+      size = 16;
+    }
+    
+    graphics.fillStyle(color, 1);
+    graphics.fillCircle(size/2, size/2, size/2);
+    graphics.generateTexture(`drop_${itemId}`, size, size);
+    graphics.clear();
+    
+    const item = this.physics.add.staticSprite(x, y, `drop_${itemId}`);
+    item.setData('itemId', itemId);
+    item.setData('type', 'loot');
+    
+    // 添加发光效果
+    this.tweens.add({
+      targets: item,
+      alpha: 0.7,
+      scale: 1.1,
+      duration: 500,
+      yoyo: true,
+      repeat: -1
+    });
+    
+    this.droppedItems.push(item);
+    console.log(`🎁 创建掉落物：${itemId} (${x}, ${y})`);
+  }
+  
+  giveExp(amount) {
+    if (!this.player) return;
+    
+    // 显示获得经验提示
+    const expText = this.add.text(this.player.x, this.player.y - 30, `+${amount} EXP`, {
+      fontSize: 18,
+      fill: '#00ff00',
+      stroke: '#000000',
+      strokeThickness: 3
+    }).setOrigin(0.5);
+    
+    // 向上飘动并消失
+    this.tweens.add({
+      targets: expText,
+      y: expText.y - 50,
+      alpha: 0,
+      duration: 1000,
+      onComplete: () => expText.destroy()
+    });
+    
+    // 更新玩家经验
+    if (!this.player.exp) this.player.exp = 0;
+    if (!this.player.level) this.player.level = 1;
+    if (!this.player.expToNext) this.player.expToNext = 100;
+    
+    this.player.exp += amount;
+    console.log(`✨ 获得经验：${amount} (总计：${this.player.exp}/${this.player.expToNext})`);
+    
+    // 检查升级
+    this.checkLevelUp();
+  }
+  
+  checkLevelUp() {
+    if (!this.player || this.player.exp < this.player.expToNext) return;
+    
+    // 升级
+    this.player.level++;
+    this.player.exp -= this.player.expToNext;
+    this.player.expToNext = Math.floor(this.player.expToNext * 1.5);
+    
+    // 属性提升
+    this.player.base.maxHp += 50;
+    this.player.base.maxMp += 20;
+    this.player.base.atk += 5;
+    this.player.base.def += 3;
+    
+    // 恢复 HP/MP
+    this.player.stats.hp = this.player.stats.maxHp;
+    this.player.stats.mp = this.player.stats.maxMp;
+    
+    console.log(`🎉 升级！当前等级：${this.player.level}`);
+    
+    // 显示升级提示
+    const levelText = this.add.text(640, 360, `🎉 升级到 ${this.player.level} 级！`, {
+      fontSize: 32,
+      fill: '#ffd700',
+      stroke: '#000000',
+      strokeThickness: 6,
+      backgroundColor: '#8b0000',
+      padding: { x: 30, y: 15 }
+    }).setOrigin(0.5);
+    
+    this.time.delayedCall(2000, () => levelText.destroy());
+  }
+  
+  initCollectionSystem() {
+    // 监听玩家与采集物的碰撞
+    this.physics.add.overlap(this.player, this.mapSystem.collectionPoints, (player, item) => {
+      if (!item.active) return;
+      
+      const type = item.getData('type');
+      this.collectItem(type, item);
+    });
+    
+    // 监听玩家与掉落物的碰撞（自动拾取）
+    this.physics.add.overlap(this.player, this.droppedItems, (player, item) => {
+      if (!item.active) return;
+      
+      const itemId = item.getData('itemId');
+      this.pickupItem(itemId, item);
+    });
+    
+    console.log('✅ 采集系统初始化完成');
+  }
+  
+  collectItem(type, item) {
+    // 禁用采集物
+    item.disableBody(true, false);
+    
+    // 显示获得提示
+    const icons = {
+      herb: '🌿',
+      ore: '🪨',
+      wood: '🪵'
+    };
+    const names = {
+      herb: '草药',
+      ore: '矿石',
+      wood: '木材'
+    };
+    
+    const icon = icons[type] || '📦';
+    const name = names[type] || type;
+    
+    const text = this.add.text(this.player.x, this.player.y - 50, `${icon} 获得 ${name}`, {
+      fontSize: 18,
+      fill: '#00ff00',
+      stroke: '#000000',
+      strokeThickness: 3
+    }).setOrigin(0.5);
+    
+    this.tweens.add({
+      targets: text,
+      y: text.y - 40,
+      alpha: 0,
+      duration: 1000,
+      onComplete: () => text.destroy()
+    });
+    
+    // 添加到背包
+    if (!this.player.inventory) this.player.inventory = {};
+    if (!this.player.inventory[type]) this.player.inventory[type] = 0;
+    this.player.inventory[type]++;
+    
+    console.log(`🎒 采集 ${name} (总计：${this.player.inventory[type]})`);
+  }
+  
+  pickupItem(itemId, item) {
+    // 禁用掉落物
+    item.disableBody(true, false);
+    
+    // 显示获得提示
+    const icons = {
+      coin: '💰',
+      herb: '🌿',
+      sword: '⚔️'
+    };
+    const names = {
+      coin: '金币',
+      herb: '草药',
+      sword: '铁剑'
+    };
+    
+    const icon = icons[itemId] || '📦';
+    const name = names[itemId] || itemId;
+    
+    const text = this.add.text(this.player.x, this.player.y - 50, `${icon} 获得 ${name}`, {
+      fontSize: 18,
+      fill: '#ffd700',
+      stroke: '#000000',
+      strokeThickness: 3
+    }).setOrigin(0.5);
+    
+    this.tweens.add({
+      targets: text,
+      y: text.y - 40,
+      alpha: 0,
+      duration: 1000,
+      onComplete: () => text.destroy()
+    });
+    
+    // 添加到背包
+    if (!this.player.inventory) this.player.inventory = {};
+    if (!this.player.inventory[itemId]) this.player.inventory[itemId] = 0;
+    this.player.inventory[itemId]++;
+    
+    console.log(`🎒 拾取 ${name} (总计：${this.player.inventory[itemId]})`);
   }
 
   addGameHints() {

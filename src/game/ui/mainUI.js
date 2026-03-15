@@ -17,7 +17,29 @@ class MainUI {
     // 右下角 - 技能栏
     this.createSkillBar();
     
+    // 右上角 - 等级和经验
+    this.createExpPanel();
+    
     console.log('✅ UI 创建完成');
+  }
+  
+  createExpPanel() {
+    // 背景
+    const bg = this.scene.add.rectangle(1180, 40, 200, 60, 0x000000, 0.7);
+    bg.setOrigin(1, 0);
+    
+    // 等级文字
+    this.levelText = this.scene.add.text(1170, 20, 'Lv.1', {
+      fontSize: 20,
+      fill: '#ffd700',
+      fontStyle: 'bold'
+    }).setOrigin(1, 0);
+    
+    // 经验文字
+    this.expText = this.scene.add.text(1170, 45, 'EXP: 0/100', {
+      fontSize: 16,
+      fill: '#00ff00'
+    }).setOrigin(1, 0);
   }
   
   createCharacterPanel() {
@@ -127,6 +149,16 @@ class MainUI {
           this.skillTexts[key].setColor('#888888');
         }
       });
+    }
+    
+    // 更新等级和经验
+    if (this.levelText && this.expText) {
+      const level = player.level || 1;
+      const exp = player.exp || 0;
+      const expToNext = player.expToNext || 100;
+      
+      this.levelText.setText(`Lv.${level}`);
+      this.expText.setText(`EXP: ${exp}/${expToNext}`);
     }
   }
   

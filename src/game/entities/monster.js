@@ -109,7 +109,34 @@ class Monster extends Phaser.Physics.Arcade.Sprite {
     this.hpBarBg.destroy();
     this.hpBar.destroy();
     
-    // TODO: 掉落物品
+    // 生成掉落物
+    this.spawnLoot();
+  }
+  
+  spawnLoot() {
+    const dropTable = this.config.drop;
+    if (!dropTable) return;
+    
+    const drops = [];
+    
+    // 遍历掉落表
+    Object.entries(dropTable).forEach(([itemId, chance]) => {
+      if (Math.random() <= chance) {
+        drops.push(itemId);
+      }
+    });
+    
+    // 创建掉落物
+    drops.forEach(itemId => {
+      const x = this.x + Phaser.Math.Between(-20, 20);
+      const y = this.y + Phaser.Math.Between(-20, 20);
+      this.scene.createDropItem(itemId, x, y);
+    });
+    
+    // 给予经验值
+    if (this.config.exp) {
+      this.scene.giveExp(this.config.exp);
+    }
   }
   
   destroy() {

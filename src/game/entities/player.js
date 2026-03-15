@@ -123,6 +123,9 @@ class Player extends Phaser.Physics.Arcade.Sprite {
     this.setActive(false);
     this.setVisible(false);
     
+    // 死亡惩罚：掉落部分物品
+    this.dropInventoryOnDeath();
+    
     // 3 秒后复活
     this.scene.time.delayedCall(3000, () => {
       this.stats.hp = this.stats.maxHp;
@@ -132,6 +135,46 @@ class Player extends Phaser.Physics.Arcade.Sprite {
       this.setVisible(true);
       console.log('✅ 玩家复活');
     });
+  }
+  
+  dropInventoryOnDeath() {
+    if (!this.inventory) return;
+    
+    // 计算掉落比例（30% 几率掉落每个物品）
+    const dropRate = 0.3;
+    let droppedCount = 0;
+    
+    Object.entries(this.inventory).forEach(([itemId, count]) => {
+      if (count > 0 && Math.random() < dropRate) {
+        const dropCount = Math.floor(count * 0.5); // 掉落一半
+        if (dropCount > 0) {
+          // 在玩家位置附近创建掉落物
+          const x = this.x + Phaser.Math.Between(-30, 30);
+          const y = this.y + Phaser.Math.Between(-30, 30);
+          
+          for (let i = 0; i < Math.min(dropCount, 3); i++) {
+            this.scene.createDropItem(itemId, x + i * 20, y);
+          }
+          
+          this.inventory[itemId] -= dropCount;
+          droppedCount += dropCount;
+        }
+      }
+    });
+    
+    if (droppedCount > 0) {
+      console.log(`💸 死亡掉落：${droppedCount} 个物品`);
+      
+      // 显示死亡提示
+      const text = this.scene.add.text(this.x, this.y - 80, '💀 死亡掉落物品！', {
+        fontSize: 20,
+        fill: '#ff0000',
+        stroke: '#000000',
+        strokeThickness: 4
+      }).setOrigin(0.5);
+      
+      this.scene.time.delayedCall(2000, () => text.destroy());
+    }
   }
 
   update() {
