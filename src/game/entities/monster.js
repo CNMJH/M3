@@ -65,10 +65,19 @@ class Monster extends Phaser.Physics.Arcade.Sprite {
         this.body.velocity.x = vx;
         this.body.velocity.y = vy;
         
+        // 2 秒后停止
         this.scene.time.delayedCall(1000, () => {
+          if (!this.active) return;
           this.body.velocity.x = 0;
           this.body.velocity.y = 0;
         });
+      }
+    });
+    
+    // 每帧更新血条位置
+    this.scene.events.on('update', () => {
+      if (this.active && this.body) {
+        this.updatePosition(this.x, this.y);
       }
     });
   }
@@ -83,6 +92,13 @@ class Monster extends Phaser.Physics.Arcade.Sprite {
       this.scene.time.delayedCall(3000, patrol);
     };
     patrol();
+    
+    // 每帧更新血条位置
+    this.scene.events.on('update', () => {
+      if (this.active && this.body) {
+        this.updatePosition(this.x, this.y);
+      }
+    });
   }
   
   takeDamage(amount) {

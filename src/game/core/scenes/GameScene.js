@@ -186,12 +186,20 @@ class GameScene extends Phaser.Scene {
       this.pickupItem(itemId, item);
     });
     
+    // 监听玩家与撤离点的碰撞
+    this.physics.add.overlap(this.player, this.mapSystem.exitPoints, (player, exit) => {
+      if (!exit.active || !exit.visible) return;
+      
+      this.tryExit(player, exit);
+    });
+    
     console.log('✅ 采集系统初始化完成');
   }
   
   collectItem(type, item) {
     // 禁用采集物
-    item.disableBody(true, false);
+    item.disableBody(true, true); // true = 从物理世界移除，true = 从显示列表移除
+    item.setVisible(false);
     
     // 显示获得提示
     const icons = {
@@ -271,6 +279,29 @@ class GameScene extends Phaser.Scene {
     this.player.inventory[itemId]++;
     
     console.log(`🎒 拾取 ${name} (总计：${this.player.inventory[itemId]})`);
+  }
+  
+  tryExit(player, exit) {
+    console.log('🚪 玩家尝试撤离');
+    
+    // 显示撤离提示
+    const exitText = this.add.text(640, 360, '🚪 撤离成功！', {
+      fontSize: 36,
+      fill: '#00ff00',
+      stroke: '#000000',
+      strokeThickness: 6,
+      backgroundColor: '#006400',
+      padding: { x: 40, y: 20 }
+    }).setOrigin(0.5);
+    
+    this.time.delayedCall(2000, () => {
+      exitText.destroy();
+      // 重置玩家位置
+      player.setPosition(400, 360);
+      player.stats.hp = player.stats.maxHp;
+      player.stats.mp = player.stats.maxMp;
+      console.log('✅ 玩家已撤离并复活');
+    });
   }
 
   addGameHints() {

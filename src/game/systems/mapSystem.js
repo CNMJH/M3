@@ -98,6 +98,7 @@ class MapSystem {
     pos.forEach(p => {
       const e = this.scene.physics.add.staticSprite(p.x, p.y, 'exit');
       e.setVisible(false);
+      e.setData('active', false);
       e.setSize(32, 32);
       this.exitPoints.push(e);
     });
