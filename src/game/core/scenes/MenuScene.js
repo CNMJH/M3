@@ -86,8 +86,8 @@ class MenuScene extends Phaser.Scene {
     // 操作说明
     const controls = [
       '【WASD】移动角色',
-      '【QWER】释放技能',
-      '【靠近怪物】自动战斗'
+      '【空格】普通攻击',
+      '【QWER】释放技能'
     ];
     
     controls.forEach((text, index) => {

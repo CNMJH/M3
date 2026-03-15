@@ -19,6 +19,9 @@ class Player extends Phaser.Physics.Arcade.Sprite {
       right: Phaser.Input.Keyboard.KeyCodes.D
     });
     
+    // 攻击键
+    this.attackKey = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+    
     this.equipConfig = scene.cache.json.get('equipmentConfig');
 
     // 基础属性
@@ -33,6 +36,10 @@ class Player extends Phaser.Physics.Arcade.Sprite {
     
     // 技能冷却
     this.skillCooldowns = { q: 0, w: 0, e: 0, r: 0, d: 0 };
+    
+    // 攻击冷却
+    this.attackCooldown = false;
+    this.attackCooldownTime = 500;
 
     this.initKeys();
   }
@@ -43,6 +50,11 @@ class Player extends Phaser.Physics.Arcade.Sprite {
       this.scene.input.keyboard.on(`keydown-${k.toLowerCase()}`, () => {
         this.cast(k.toLowerCase());
       });
+    });
+    
+    // 空格键攻击
+    this.scene.input.keyboard.on('keydown-SPACE', () => {
+      this.attack();
     });
   }
 
@@ -76,6 +88,20 @@ class Player extends Phaser.Physics.Arcade.Sprite {
         });
       }
     });
+  }
+
+  attack() {
+    // 检查攻击冷却
+    if (this.attackCooldown) return;
+    this.attackCooldown = true;
+    this.scene.time.delayedCall(this.attackCooldownTime, () => {
+      this.attackCooldown = false;
+    });
+    
+    // 调用战斗系统的攻击方法
+    if (this.scene.combatSystem) {
+      this.scene.combatSystem.playerAttack(this);
+    }
   }
 
   cast(key) {

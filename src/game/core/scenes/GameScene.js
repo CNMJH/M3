@@ -86,9 +86,11 @@ class GameScene extends Phaser.Scene {
     graphics.generateTexture(`drop_${itemId}`, size, size);
     graphics.clear();
     
-    const item = this.physics.add.staticSprite(x, y, `drop_${itemId}`);
+    const item = this.physics.add.sprite(x, y, `drop_${itemId}`);
     item.setData('itemId', itemId);
     item.setData('type', 'loot');
+    item.setImmovable(true);
+    item.body.allowGravity = false;
     
     // 添加发光效果
     this.tweens.add({
@@ -172,7 +174,7 @@ class GameScene extends Phaser.Scene {
   initCollectionSystem() {
     // 监听玩家与采集物的碰撞
     this.physics.add.overlap(this.player, this.mapSystem.collectionPoints, (player, item) => {
-      if (!item.active) return;
+      if (!item.visible) return;
       
       const type = item.getData('type');
       this.collectItem(type, item);
@@ -180,7 +182,7 @@ class GameScene extends Phaser.Scene {
     
     // 监听玩家与掉落物的碰撞（自动拾取）
     this.physics.add.overlap(this.player, this.droppedItems, (player, item) => {
-      if (!item.active) return;
+      if (!item.visible) return;
       
       const itemId = item.getData('itemId');
       this.pickupItem(itemId, item);
@@ -306,7 +308,7 @@ class GameScene extends Phaser.Scene {
 
   addGameHints() {
     // 左上角 - 目标提示
-    const hintBg = this.add.rectangle(150, 120, 280, 100, 0x000000, 0.7);
+    const hintBg = this.add.rectangle(150, 140, 280, 120, 0x000000, 0.7);
     hintBg.setOrigin(0, 0);
     
     this.add.text(20, 125, '🎯 游戏目标', {
@@ -326,6 +328,13 @@ class GameScene extends Phaser.Scene {
         fontSize: 14,
         fill: '#aabbcc'
       });
+    });
+    
+    // 操作提示
+    this.add.text(20, 230, '【空格键】攻击', {
+      fontSize: 14,
+      fill: '#ffcc00',
+      fontStyle: 'bold'
     });
   }
 

@@ -18,35 +18,12 @@ class CombatSystem {
   }
 
   initCombatCollisions(player) {
-    // 玩家与怪物碰撞时自动攻击（玩家攻击怪物）
-    this.scene.physics.add.overlap(player, this.monsters, (p, m) => {
-      if (m.active && p.active) {
-        // 玩家攻击怪物
-        this.playerAttack(p, m);
-      }
-    });
-    
-    // 怪物主动攻击玩家
-    this.scene.time.addEvent({
-      delay: 1000,
-      loop: true,
-      callback: () => {
-        this.monsters.forEach(m => {
-          if (!m.active) return;
-          
-          // 检查怪物是否在玩家附近（200 像素内）
-          const dist = Phaser.Math.Distance.Between(m.x, m.y, player.x, player.y);
-          if (dist < 200 && player.active) {
-            this.monsterAttack(m, player);
-          }
-        });
-      }
-    });
-    
-    console.log('✅ 战斗碰撞初始化完成');
+    // 移除撞击自动攻击 - 改为按键主动攻击
+    console.log('✅ 战斗系统初始化完成（空格键攻击）');
   }
-
-  playerAttack(attacker, target) {
+  
+  // 玩家主动攻击（空格键）
+  playerAttack(player) {
     // 攻击冷却
     if (this.attackCooldown) return;
     this.attackCooldown = true;
@@ -54,29 +31,23 @@ class CombatSystem {
       this.attackCooldown = false;
     });
     
-    // 伤害计算
-    const damage = attacker.stats.atk;
-    target.takeDamage(damage);
-    
-    // 攻击特效
-    this.createAttackEffect(target.x, target.y);
-  }
-  
-  monsterAttack(attacker, target) {
-    // 怪物攻击冷却（1 秒一次）
-    if (attacker.attackCooldown) return;
-    attacker.attackCooldown = true;
-    
-    // 伤害计算
-    const damage = attacker.stats.atk;
-    target.takeDamage(damage);
-    
-    console.log(`👾 ${attacker.config.name} 攻击玩家，造成 ${damage} 点伤害`);
-    
-    // 1 秒后可以再次攻击
-    this.scene.time.delayedCall(1000, () => {
-      attacker.attackCooldown = false;
+    // 查找范围内的怪物
+    let hitCount = 0;
+    this.monsters.forEach(m => {
+      if (!m.active) return;
+      
+      const dist = Phaser.Math.Distance.Between(player.x, player.y, m.x, m.y);
+      if (dist < 80) { // 攻击范围 80 像素
+        const damage = player.stats.atk;
+        m.takeDamage(damage);
+        this.createAttackEffect(m.x, m.y);
+        hitCount++;
+      }
     });
+    
+    if (hitCount > 0) {
+      console.log(`⚔️ 攻击命中 ${hitCount} 个怪物`);
+    }
   }
   
   createAttackEffect(x, y) {

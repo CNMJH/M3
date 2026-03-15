@@ -44,10 +44,15 @@ class MapSystem {
     ground.setCollisionByExclusion([-1]);
     this.groundLayer = ground;
 
+    // 设置相机边界（限制玩家不能走出地图）
+    const mapWidthPx = this.mapWidth * this.tileSize;
+    const mapHeightPx = this.mapHeight * this.tileSize;
+    this.scene.cameras.main.setBounds(0, 0, mapWidthPx, mapHeightPx);
+
     // 添加地图边界
     this.createMapBorders();
 
-    console.log(`✅ 地图创建完成：${this.mapWidth}x${this.mapHeight}`);
+    console.log(`✅ 地图创建完成：${this.mapWidth}x${this.mapHeight} (${mapWidthPx}x${mapHeightPx} 像素)`);
 
     this.addCollectionPoints();
     this.addExitPoints();
