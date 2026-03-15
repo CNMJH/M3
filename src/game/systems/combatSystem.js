@@ -35,7 +35,7 @@ class CombatSystem {
           if (!m.active) return;
           
           // 检查怪物是否在玩家附近（200 像素内）
-          const dist = this.scene.physics.distanceBetween(player, m);
+          const dist = Phaser.Math.Distance.Between(m.x, m.y, player.x, player.y);
           if (dist < 200 && player.active) {
             this.monsterAttack(m, player);
           }
