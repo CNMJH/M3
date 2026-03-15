@@ -70,7 +70,7 @@ class GameScene extends Phaser.Scene {
     
     // 根据物品 ID 生成不同颜色的掉落物
     let color = 0xffff00; // 默认金色
-    let size = 12;
+    let size = 16;
     
     if (itemId === 'coin') {
       color = 0xffd700; // 金币 - 金色
@@ -78,7 +78,7 @@ class GameScene extends Phaser.Scene {
       color = 0x00ff00; // 草药 - 绿色
     } else if (itemId === 'sword') {
       color = 0x888888; // 剑 - 银色
-      size = 16;
+      size = 20;
     }
     
     graphics.fillStyle(color, 1);
@@ -91,11 +91,12 @@ class GameScene extends Phaser.Scene {
     item.setData('type', 'loot');
     item.setImmovable(true);
     item.body.allowGravity = false;
+    item.setCircle(size/2);
     
     // 添加发光效果
     this.tweens.add({
       targets: item,
-      alpha: 0.7,
+      alpha: 0.8,
       scale: 1.1,
       duration: 500,
       yoyo: true,
@@ -186,6 +187,17 @@ class GameScene extends Phaser.Scene {
       
       const itemId = item.getData('itemId');
       this.pickupItem(itemId, item);
+    });
+    
+    // 设置掉落物与玩家的碰撞检测
+    this.droppedItems.forEach(item => {
+      if (item.body) {
+        item.body.checkCollision.none = false;
+        item.body.checkCollision.up = false;
+        item.body.checkCollision.down = false;
+        item.body.checkCollision.left = false;
+        item.body.checkCollision.right = false;
+      }
     });
     
     // 监听玩家与撤离点的碰撞
@@ -342,6 +354,25 @@ class GameScene extends Phaser.Scene {
     if (this.player) this.player.update();
     if (this.network) this.network.update();
     if (this.ui) this.ui.update(this.player);
+    
+    // 手动检测掉落物拾取（更可靠）
+    if (this.player && this.player.active) {
+      this.droppedItems.forEach(item => {
+        if (!item.visible) return;
+        
+        const dist = Phaser.Math.Distance.Between(
+          this.player.x,
+          this.player.y,
+          item.x,
+          item.y
+        );
+        
+        if (dist < 30) { // 拾取范围 30 像素
+          const itemId = item.getData('itemId');
+          this.pickupItem(itemId, item);
+        }
+      });
+    }
   }
 
   shutdown() {
