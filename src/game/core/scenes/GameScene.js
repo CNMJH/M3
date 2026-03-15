@@ -1,9 +1,9 @@
 import Phaser from 'phaser';
-import MapSystem from '../systems/mapSystem.js';
-import Player from '../entities/player.js';
-import CombatSystem from '../systems/combatSystem.js';
-import MainUI from '../ui/mainUI.js';
-import Network from '../systems/network.js';
+import MapSystem from '../../systems/mapSystem.js';
+import Player from '../../entities/player.js';
+import CombatSystem from '../../systems/combatSystem.js';
+import MainUI from '../../ui/mainUI.js';
+import Network from '../../systems/network.js';
 
 class GameScene extends Phaser.Scene {
   constructor() {
