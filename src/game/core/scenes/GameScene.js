@@ -31,6 +31,9 @@ class GameScene extends Phaser.Scene {
     this.player = new Player(this, cx, cy);
     console.log(`✅ 玩家创建完成 (${cx}, ${cy})`);
     
+    // 添加游戏提示
+    this.addGameHints();
+    
     // 注册玩家到战斗系统
     this.combatSystem.registerPlayer(this.player);
     
@@ -49,6 +52,31 @@ class GameScene extends Phaser.Scene {
     this.network.connect();
     
     console.log('===== GameScene 初始化完成 =====');
+  }
+
+  addGameHints() {
+    // 左上角 - 目标提示
+    const hintBg = this.add.rectangle(150, 120, 280, 100, 0x000000, 0.7);
+    hintBg.setOrigin(0, 0);
+    
+    this.add.text(20, 125, '🎯 游戏目标', {
+      fontSize: 16,
+      fill: '#ffffff',
+      fontStyle: 'bold'
+    });
+    
+    const hints = [
+      '• 击败哥布林大王',
+      '• 等待撤离点开放',
+      '• 收集资源变强'
+    ];
+    
+    hints.forEach((text, i) => {
+      this.add.text(20, 150 + i * 22, text, {
+        fontSize: 14,
+        fill: '#aabbcc'
+      });
+    });
   }
 
   update(time, delta) {

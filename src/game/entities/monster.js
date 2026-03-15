@@ -1,32 +1,35 @@
 import Phaser from 'phaser';
 
 class Monster extends Phaser.Physics.Arcade.Sprite {
-  constructor(scene, x, y, type, config) {
-    super(scene, x, y, 'monster-red');
+  constructor(scene, x, y, type, config, texture = 'monster-red') {
+    super(scene, x, y, texture);
     scene.add.existing(this);
     scene.physics.add.existing(this);
     this.scene = scene;
 
     this.type = type;
     this.config = config;
-    
-    // 从配置复制属性
     this.stats = { ...config };
     
-    this.body.setSize(24, 24);
+    // 根据类型设置大小
+    const size = type === 'goblinKing' ? 40 : 24;
+    this.body.setSize(size, size);
     this.type = 'monster';
     
     // 显示名称
     this.nameText = scene.add.text(x, y - 20, config.name, {
-      fontSize: 12,
+      fontSize: 14,
       fill: '#ff0000',
-      backgroundColor: '#00000080'
+      fontStyle: 'bold',
+      stroke: '#000000',
+      strokeThickness: 4
     }).setOrigin(0.5);
     
     // 血条背景
-    this.hpBarBg = scene.add.rectangle(x, y - 10, 32, 4, 0x333333);
+    const barWidth = type === 'goblinKing' ? 48 : 32;
+    this.hpBarBg = scene.add.rectangle(x, y - 10, barWidth, 4, 0x333333);
     // 血条
-    this.hpBar = scene.add.rectangle(x, y - 10, 32, 4, 0xff0000);
+    this.hpBar = scene.add.rectangle(x, y - 10, barWidth, 4, 0xff0000);
     
     this.updatePosition(x, y);
     

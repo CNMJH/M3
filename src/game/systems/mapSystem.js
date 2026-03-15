@@ -17,6 +17,9 @@ class MapSystem {
   }
 
   createMap() {
+    // 填充背景色
+    this.scene.cameras.main.setBackgroundColor('#1a3009');
+    
     // 创建地图
     const map = this.scene.make.tilemap({
       width: this.mapWidth,
@@ -25,19 +28,34 @@ class MapSystem {
       tileHeight: this.tileSize
     });
 
-    // 添加地砖层
     const tileset = map.addTilesetImage('grass-tile');
     const ground = map.createLayer('Ground', tileset, 0, 0);
     ground.setCollisionByExclusion([-1]);
     this.groundLayer = ground;
 
-    console.log(`✅ 地图创建完成：${this.mapWidth}x${this.mapHeight} (${this.mapWidth * this.tileSize}x${this.mapHeight * this.tileSize} 像素)`);
+    // 添加地图边界
+    this.createMapBorders();
+
+    console.log(`✅ 地图创建完成：${this.mapWidth}x${this.mapHeight}`);
 
     this.addCollectionPoints();
     this.addExitPoints();
     this.startExitTimer();
 
     return map;
+  }
+
+  createMapBorders() {
+    const graphics = this.scene.add.graphics();
+    graphics.lineStyle(4, 0x4a4a6a, 1);
+    graphics.strokeRect(0, 0, this.mapWidth * this.tileSize, this.mapHeight * this.tileSize);
+    
+    // 四个角标记
+    graphics.fillStyle(0x4a4a6a, 1);
+    graphics.fillRect(0, 0, 8, 8);
+    graphics.fillRect(this.mapWidth * this.tileSize - 8, 0, 8, 8);
+    graphics.fillRect(0, this.mapHeight * this.tileSize - 8, 8, 8);
+    graphics.fillRect(this.mapWidth * this.tileSize - 8, this.mapHeight * this.tileSize - 8, 8, 8);
   }
 
   addCollectionPoints() {
@@ -146,7 +164,10 @@ class MapSystem {
 
   spawnMonster(type, x, y) {
     const cfg = this.monsterConfig[type];
-    const m = new Monster(this.scene, x, y, type, cfg);
+    
+    // 哥布林大王使用特殊纹理
+    const texture = type === 'goblinKing' ? 'monster-king' : 'monster-red';
+    const m = new Monster(this.scene, x, y, type, cfg, texture);
     return m;
   }
 
