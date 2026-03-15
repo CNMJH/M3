@@ -28,8 +28,19 @@ class MapSystem {
       tileHeight: this.tileSize
     });
 
+    // 添加 tileset
     const tileset = map.addTilesetImage('grass-tile');
-    const ground = map.createLayer('Ground', tileset, 0, 0);
+    
+    // 创建空白图层
+    const ground = map.createBlankLayer('Ground', tileset);
+    
+    // 填充整个地图为草地（使用 tile index 0）
+    for (let y = 0; y < this.mapHeight; y++) {
+      for (let x = 0; x < this.mapWidth; x++) {
+        ground.putTileAt(0, x, y);
+      }
+    }
+    
     ground.setCollisionByExclusion([-1]);
     this.groundLayer = ground;
 
