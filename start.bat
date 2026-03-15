@@ -5,6 +5,13 @@ echo   M3 游戏 - 启动脚本
 echo ========================================
 echo.
 
+echo [1/4] 清理旧进程...
+for /f "tokens=5" %%a in ('netstat -aon ^| findstr :3001 ^| findstr LISTENING') do (
+    taskkill /F /PID %%a >nul 2>&1
+)
+timeout /t 1 /nobreak >nul
+echo.
+
 REM 检查 Node.js 是否安装
 where node >nul 2>nul
 if %ERRORLEVEL% NEQ 0 (
@@ -16,13 +23,13 @@ if %ERRORLEVEL% NEQ 0 (
     exit /b 1
 )
 
-echo ✅ Node.js 已安装
+echo [2/4] ✅ Node.js 已安装
 node -v
 echo.
 
 REM 检查 node_modules 是否存在
 if not exist "node_modules\" (
-    echo 📦 首次运行，正在安装依赖...
+    echo [3/4] 📦 首次运行，正在安装依赖...
     echo    这可能需要 1-3 分钟，请耐心等待
     echo.
     call npm install
@@ -36,7 +43,7 @@ if not exist "node_modules\" (
     echo ✅ 依赖安装完成
     echo.
 ) else (
-    echo ✅ 依赖已安装
+    echo [3/4] ✅ 依赖已安装
     echo.
     REM 检查是否需要更新依赖
     echo  检查依赖更新...
@@ -44,8 +51,7 @@ if not exist "node_modules\" (
     echo.
 )
 
-echo ========================================
-echo   启动开发服务器
+echo [4/4] 启动开发服务器...
 echo ========================================
 echo.
 echo 🌐 浏览器访问：http://localhost:3001
